@@ -6,7 +6,8 @@ namespace RB_Tree
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+           
         }
     }
+    
 }

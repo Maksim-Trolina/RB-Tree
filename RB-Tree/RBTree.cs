@@ -2,11 +2,20 @@ using System.Threading.Tasks;
 
 namespace RB_Tree
 {
-    public class RBTree<T,V> : IMap<T,V>
+    public class RBTree<T, V> : IMap<T, V>
     {
+        private Node<T, V> root;
+
         public void Insert(T key, V value)
         {
-            throw new System.NotImplementedException();
+            if (root == null)
+            {
+                root = new Node<T, V>(key, value) {Color = Color.Black};
+
+                return;
+            }
+
+            /*if ()*/
         }
 
         public V Find(T key)
@@ -38,5 +47,23 @@ namespace RB_Tree
         {
             throw new System.NotImplementedException();
         }
+
+        private void LeftTurn()
+        {
+        }
+
+        private void RightTurn()
+        {
+        }
+
+        /*private Node<T, V> Find(T key,V value)
+        {
+            var currentNode = root;
+
+            while (currentNode!=null)
+            {
+                if(currentNode.Key)
+            }
+        }*/
     }
 }
