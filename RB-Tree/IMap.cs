@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace RB_Tree
 {
-    public interface IMap<T,V>
+    public interface IMap<T, V>
     {
         void Insert(T key, V value);
 
         V Find(T key);
 
-        int Count { get;}
+        int Count { get; }
 
         void Remove(T key);
 
@@ -18,6 +18,6 @@ namespace RB_Tree
 
         List<V> GetValues();
 
-        string Print();
+        void Print();
     }
 }

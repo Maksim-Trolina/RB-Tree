@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace RB_Tree
 {
@@ -11,7 +10,7 @@ namespace RB_Tree
 
         private Node<T, V> root;
 
-        public int Count { get; private set; } = 0;
+        public int Count { get; private set; }
 
         public RbTree(IComparer comparer)
         {
@@ -37,30 +36,17 @@ namespace RB_Tree
 
             newNode.Parent = parent;
 
-            AddChild(parent,newNode);
+            parent.AddChild(newNode, comparer);
 
             FixInsert(newNode);
         }
 
-        private void AddChild(Node<T, V> parent, Node<T, V> child)
-        {
-            var compRes = (ComparisonResult) comparer.Compare(parent.Key, child.Key);
-
-            if (compRes == ComparisonResult.Less)
-            {
-                parent.Right = child;
-            }
-            else
-            {
-                parent.Left = child;
-            }
-        }
 
         public V Find(T key)
         {
             var node = Find(root, key);
 
-            if (!NodeExist(node,key))
+            if (!IsNodeExist(node, key))
             {
                 throw new Exception("Not found item with same key");
             }
@@ -68,23 +54,18 @@ namespace RB_Tree
             return node.Data;
         }
 
-        private bool NodeExist(Node<T, V> node, T key)
-        {
-            return node != null && comparer.Compare(node.Key, key) == (int) ComparisonResult.Equal;
-        }
-
         public void Remove(T key)
         {
             var node = Find(root, key);
 
-            if (!NodeExist(node,key))
+            if (!IsNodeExist(node, key))
             {
                 throw new Exception("Not found item with same key");
             }
 
             Count--;
 
-            if (!LeftChildExist(node) && !RightChildExist(node))
+            if (!node.IsLeftChildExist() && !node.IsRightChildExist())
             {
                 RemoveWithZeroChild(node);
 
@@ -92,123 +73,26 @@ namespace RB_Tree
             }
 
             Node<T, V> nextNode = null;
-            
-            if (!LeftChildExist(node) || !RightChildExist(node))
+
+            if (!node.IsLeftChildExist() || !node.IsRightChildExist())
             {
                 RemoveWithOneChild(node);
             }
             else
             {
-                RemoveWithTwoChild(node,ref nextNode);
+                RemoveWithTwoChild(node, ref nextNode);
             }
 
-            if (nextNode!=null && nextNode!=node)
+            if (nextNode != null && nextNode != node)
             {
                 node.Color = nextNode.Color;
 
                 node.Key = nextNode.Key;
             }
 
-            if (IsBlack(nextNode))
+            if (nextNode.IsBlack())
             {
                 FixRemove(nextNode);
-            }
-
-        }
-
-        private bool IsBlack(Node<T, V> node)
-        {
-            if (node == null)
-            {
-                return false;
-            }
-
-            return node.Color == Color.Black;
-        }
-
-        private void RemoveWithZeroChild(Node<T, V> node)
-        {
-            if (IsRoot(node))
-            {
-                root = null;
-            }
-            else
-            {
-                if (IsLeftChild(node))
-                {
-                    node.Parent.Left = null;
-                }
-                else
-                {
-                    node.Parent.Right = null;
-                }
-            }
-        }
-
-        private void RemoveWithOneChild(Node<T, V> node)
-        {
-            if (IsRoot(node))
-            {
-                root = node.Left ?? node.Right;
-
-                return;
-            }
-            if (!LeftChildExist(node))
-            {
-                if (IsLeftChild(node))
-                {
-                    node.Parent.Left = node.Left;
-                }
-                else
-                {
-                    node.Parent.Right = node.Left;
-                }
-            }
-            else
-            {
-                if (IsLeftChild(node))
-                {
-                    node.Parent.Left = node.Right;
-                }
-                else
-                {
-                    node.Parent.Right = node.Right;
-                }
-            }
-            
-            
-        }
-
-        private bool IsRoot(Node<T, V> node)
-        {
-            return node == root;
-        }
-
-        private void RemoveWithTwoChild(Node<T, V> node,ref Node<T,V> nextNode)
-        {
-            nextNode = NextNode(node);
-            
-            if (!RightChildExist(node))
-            {
-                nextNode.Right.Parent = nextNode.Parent;
-            }
-
-            if (IsRoot(nextNode))
-            {
-                root = nextNode.Right;
-            }
-            else
-            {
-                var father = nextNode.Parent;
-
-                if (IsLeftChild(nextNode))
-                {
-                    father.Left = nextNode.Right;
-                }
-                else
-                {
-                    father.Right = nextNode.Right;
-                }
             }
         }
 
@@ -228,6 +112,123 @@ namespace RB_Tree
             return keys;
         }
 
+        public List<V> GetValues()
+        {
+            var values = new List<V>();
+
+            AddValue(root, values);
+
+            return values;
+        }
+
+        public void Print()
+        {
+            var output = ToString();
+
+            Console.WriteLine(output);
+        }
+
+        public override string ToString()
+        {
+            var keys = GetKeys();
+
+            var values = GetValues();
+
+            var output = "";
+
+            for (var i = 0; i < Count; i++)
+            {
+                output += $"key = {keys[i]} value = {values[i]}\n";
+            }
+
+            return output;
+        }
+
+        private void RemoveWithZeroChild(Node<T, V> node)
+        {
+            if (IsRoot(node))
+            {
+                root = null;
+            }
+            else
+            {
+                if (node.IsLeftChild())
+                {
+                    node.Parent.Left = null;
+                }
+                else
+                {
+                    node.Parent.Right = null;
+                }
+            }
+        }
+
+        private void RemoveWithOneChild(Node<T, V> node)
+        {
+            if (IsRoot(node))
+            {
+                root = node.Left ?? node.Right;
+
+                return;
+            }
+
+            if (!node.IsLeftChildExist())
+            {
+                if (node.IsLeftChild())
+                {
+                    node.Parent.Left = node.Left;
+                }
+                else
+                {
+                    node.Parent.Right = node.Left;
+                }
+            }
+            else
+            {
+                if (node.IsLeftChild())
+                {
+                    node.Parent.Left = node.Right;
+                }
+                else
+                {
+                    node.Parent.Right = node.Right;
+                }
+            }
+        }
+
+        private bool IsRoot(Node<T, V> node)
+        {
+            return node == root;
+        }
+
+        private void RemoveWithTwoChild(Node<T, V> node, ref Node<T, V> nextNode)
+        {
+            nextNode = node.NextNode();
+
+            if (!node.IsRightChildExist())
+            {
+                nextNode.Right.Parent = nextNode.Parent;
+            }
+
+            if (IsRoot(nextNode))
+            {
+                root = nextNode.Right;
+            }
+            else
+            {
+                var father = nextNode.Parent;
+
+                if (nextNode.IsLeftChild())
+                {
+                    father.Left = nextNode.Right;
+                }
+                else
+                {
+                    father.Right = nextNode.Right;
+                }
+            }
+        }
+
         private void AddKey(Node<T, V> node, List<T> keys)
         {
             if (node == null)
@@ -240,15 +241,6 @@ namespace RB_Tree
             keys.Add(node.Key);
 
             AddKey(node.Right, keys);
-        }
-
-        public List<V> GetValues()
-        {
-            var values = new List<V>();
-
-            AddValue(root, values);
-
-            return values;
         }
 
         private void AddValue(Node<T, V> node, List<V> values)
@@ -265,58 +257,40 @@ namespace RB_Tree
             AddValue(node.Right, values);
         }
 
-        public string Print()
-        {
-            var keys = GetKeys();
-
-            var values = GetValues();
-
-            var output = "";
-
-            for (var i = 0; i < Count; i++)
-            {
-                output += $"key = {keys[i]} value = {values[i]}\n";
-            }
-
-            Console.WriteLine(output);
-
-            return output;
-        }
-
         private void FixRemove(Node<T, V> node)
         {
-            while (IsBlack(node) && !IsRoot(node))
+            while (node.IsBlack() && !IsRoot(node))
             {
-                if (IsLeftChild(node))
+                if (node.IsLeftChild())
                 {
-                    var brother = GetBrother(node);
+                    var brother = node.GetBrother();
 
                     if (brother == null)
                     {
                         break;
                     }
 
-                    if (!IsBlack(brother))
+                    if (!brother.IsBlack())
                     {
                         brother.Color = Color.Black;
 
                         node.Parent.Color = Color.Red;
-                        
+
                         LeftRotate(node.Parent);
                     }
 
-                    if (IsLeftChildBlack(brother) && IsRightChildBlack(brother))
+                    if (brother.IsLeftChildBlack() && brother.IsRightChildBlack())
                     {
                         brother.Color = Color.Red;
                     }
                     else
                     {
-                        if (IsRightChildBlack(brother))
+                        if (brother.IsRightChildBlack())
                         {
                             brother.Left.Color = Color.Black;
 
                             brother.Color = Color.Red;
-                            
+
                             RightRotate(brother);
                         }
 
@@ -325,7 +299,7 @@ namespace RB_Tree
                         node.Parent.Color = Color.Black;
 
                         brother.Right.Color = Color.Black;
-                        
+
                         LeftRotate(node.Parent);
 
                         node = root;
@@ -333,34 +307,34 @@ namespace RB_Tree
                 }
                 else
                 {
-                    var brother = GetBrother(node);
-                    
+                    var brother = node.GetBrother();
+
                     if (brother == null)
                     {
                         break;
                     }
 
-                    if (!IsBlack(brother))
+                    if (!brother.IsBlack())
                     {
                         brother.Color = Color.Black;
 
                         node.Parent.Color = Color.Red;
-                        
+
                         RightRotate(node.Parent);
                     }
 
-                    if (IsLeftChildBlack(brother) && IsRightChildBlack(brother))
+                    if (brother.IsLeftChildBlack() && brother.IsRightChildBlack())
                     {
                         brother.Color = Color.Red;
                     }
                     else
                     {
-                        if (IsLeftChildBlack(brother))
+                        if (brother.IsLeftChildBlack())
                         {
                             brother.Right.Color = Color.Black;
 
                             brother.Color = Color.Red;
-                            
+
                             LeftRotate(brother);
                         }
 
@@ -369,7 +343,7 @@ namespace RB_Tree
                         node.Parent.Color = Color.Black;
 
                         brother.Left.Color = Color.Black;
-                        
+
                         RightRotate(node.Parent);
 
                         node = root;
@@ -382,88 +356,21 @@ namespace RB_Tree
             root.Color = Color.Black;
         }
 
-        private bool IsLeftChildBlack(Node<T, V> node)
-        {
-            return IsBlack(node.Left);
-        }
-
-        private bool IsRightChildBlack(Node<T, V> node)
-        {
-            return IsBlack(node.Left);
-        }
-        
-        private bool LeftChildExist(Node<T, V> node)
-        {
-            return node?.Left != null;
-        }
-
-        private bool RightChildExist(Node<T, V> node)
-        {
-            return node?.Right != null;
-        }
-
-        private bool IsLeftChild(Node<T, V> node)
-        {
-            if (node.Parent == null)
-            {
-                return false;
-            }
-
-            return node.Parent.Left == node;
-        }
-
-        private Node<T, V> GetBrother(Node<T, V> node)
-        {
-            if (IsLeftChild(node))
-            {
-                return node.Parent.Right;
-            }
-
-            if (IsRightChild(node))
-            {
-                return node.Parent.Left;
-            }
-
-            return null;
-        }
-
-        private bool IsRightChild(Node<T, V> node)
-        {
-            if (node.Parent == null)
-            {
-                return false;
-            }
-
-            return node.Parent.Right == node;
-        }
-
-        private Node<T, V> NextNode(Node<T, V> node)
-        {
-            var child = node.Right;
-
-            while (child.Left!=null)
-            {
-                child = child.Left;
-            }
-
-            return child;
-        }
-    
         private void FixInsert(Node<T, V> newNode)
         {
             var father = newNode.Parent;
 
-            while (!IsBlack(father))
+            while (!father.IsBlack())
             {
                 var grandFather = father.Parent;
 
-                if (IsLeftChild(father))
+                if (father.IsLeftChild())
                 {
                     var uncle = grandFather.Right;
 
                     if (uncle != null)
                     {
-                        if (!IsBlack(uncle))
+                        if (!uncle.IsBlack())
                         {
                             father.Color = Color.Black;
 
@@ -480,7 +387,7 @@ namespace RB_Tree
                     }
                     else
                     {
-                        if (IsRightChild(newNode))
+                        if (newNode.IsRightChild())
                         {
                             newNode = father;
 
@@ -500,7 +407,7 @@ namespace RB_Tree
 
                     if (uncle != null)
                     {
-                        if (!IsBlack(uncle))
+                        if (!uncle.IsBlack())
                         {
                             father.Color = Color.Black;
 
@@ -513,7 +420,7 @@ namespace RB_Tree
                     }
                     else
                     {
-                        if (IsLeftChild(newNode))
+                        if (newNode.IsLeftChild())
                         {
                             newNode = father;
 
@@ -542,7 +449,7 @@ namespace RB_Tree
 
             if (node.Parent != null)
             {
-                if (IsLeftChild(node))
+                if (node.IsLeftChild())
                 {
                     node.Parent.Left = pivot;
                 }
@@ -554,7 +461,7 @@ namespace RB_Tree
 
             node.Right = pivot.Left;
 
-            if (LeftChildExist(pivot))
+            if (pivot.IsLeftChildExist())
             {
                 pivot.Left.Parent = node;
             }
@@ -579,7 +486,7 @@ namespace RB_Tree
 
             if (node.Parent != null)
             {
-                if (IsLeftChild(node))
+                if (node.IsLeftChild())
                 {
                     node.Parent.Left = pivot;
                 }
@@ -591,7 +498,7 @@ namespace RB_Tree
 
             node.Left = pivot.Right;
 
-            if (RightChildExist(pivot))
+            if (pivot.IsRightChildExist())
             {
                 pivot.Right.Parent = node;
             }
@@ -617,6 +524,11 @@ namespace RB_Tree
                 ComparisonResult.More => current.Left == null ? current : Find(current.Left, key),
                 _ => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        private bool IsNodeExist(Node<T, V> node, T key)
+        {
+            return node != null && comparer.Compare(node.Key, key) == (int) ComparisonResult.Equal;
         }
     }
 }

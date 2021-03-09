@@ -254,7 +254,7 @@ namespace RB_Tree_Test
             
             map.Insert(66,777);
 
-            var actualOutput = map.Print();
+            var actualOutput = map.ToString();
 
             var expectedOutput = "key = 3 value = 155\nkey = 66 value = 777\nkey = 594 value = 423\n";
             
@@ -382,7 +382,7 @@ namespace RB_Tree_Test
             
             map.Insert("cz3",777);
 
-            var actualOutput = map.Print();
+            var actualOutput = map.ToString();
 
             var expectedOutput = "key = as value = 155\nkey = cz3 value = 777\nkey = fgh value = 423\n";
             
