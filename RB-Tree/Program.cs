@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 namespace RB_Tree
 {
@@ -6,18 +7,65 @@ namespace RB_Tree
     {
         static void Main(string[] args)
         {
-          IComparer comparer = new IntComparer();
-          
-          RbTree<int,int> map = new RbTree<int, int>(comparer);
-          
-          map.Insert(3,155);
-            
-          map.Insert(594,423);
-            
-          map.Insert(66,777);
-          
-          map.Print();
+            try
+            {
+                IComparer comparer = new StrComparer();
+
+                IMap<string, int> map = new RbTree<string, int>(comparer);
+
+                Console.Write("How many items to insert: ");
+
+                var countInsert = Convert.ToInt32(Console.ReadLine());
+
+                for (var i = 0; i < countInsert; i++)
+                {
+                    Console.Write("Write key: ");
+
+                    var key = Console.ReadLine();
+
+                    Console.Write("Write value: ");
+
+                    var value = Convert.ToInt32(Console.ReadLine());
+
+                    map.Insert(key, value);
+                }
+
+                Console.Write("How many items to remove: ");
+
+                var countRemove = Convert.ToInt32(Console.ReadLine());
+
+                for (var i = 0; i < countRemove; i++)
+                {
+                    Console.Write("Write key: ");
+
+                    var key = Console.ReadLine();
+
+                    map.Remove(key);
+                }
+
+                Console.Write("How many items to find: ");
+
+                var countFind = Convert.ToInt32(Console.ReadLine());
+
+                for (var i = 0; i < countFind; i++)
+                {
+                    Console.Write("Write key: ");
+
+                    var key = Console.ReadLine();
+
+                    var value = map.Find(key);
+
+                    Console.WriteLine($"Value: {value}");
+                }
+
+                Console.WriteLine("Output of all remaining items:");
+
+                map.Print();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
-    
 }
