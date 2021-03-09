@@ -1,24 +1,22 @@
 namespace RB_Tree
 {
-    public class Node<T,V>
+    public class Node<T, V>
     {
-        public Color Color { get; set; }
+        public Color Color { get; set; } = Color.Red;
+        public Node<T, V> Left { get; set; }
+        public Node<T, V> Right { get; set; }
 
-        public readonly T Key;
+        public Node<T, V> Parent { get; set; }
 
-        public V Value;
+        public T Key { get; set; }
 
-        public Node<T,V> LeftChild { get; set; }
+        public V Data { get; set; }
 
-        public Node<T,V> RightChild { get; set; }
-
-        public Node<T,V> Parent { get; set; }
-        
-        public Node(T key,V value)
+        public Node(T key, V data)
         {
             Key = key;
 
-            Value = value;
+            Data = data;
         }
     }
 }

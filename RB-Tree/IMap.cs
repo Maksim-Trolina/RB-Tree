@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace RB_Tree
 {
     public interface IMap<T,V>
@@ -6,14 +8,16 @@ namespace RB_Tree
 
         V Find(T key);
 
+        int Count { get;}
+
         void Remove(T key);
 
         void Clear();
 
-        T[] GetKeys();
+        List<T> GetKeys();
 
-        V[] GetValues();
+        List<V> GetValues();
 
-        void Print();
+        string Print();
     }
 }
